@@ -4,9 +4,9 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using Spectre.Console;
-using Spectre.Console.Cli;
 using OpenCvSharp;
+using Spectre.Cli;
+using Spectre.Console;
 
 var app = new CommandApp<CompressImagesCommand>();
 return app.Run(args);
