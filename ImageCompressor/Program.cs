@@ -93,8 +93,9 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
 
             if (settings.DeleteOriginal)
                 fi.Delete();
-            return new ConversionResult(fi.Length, fi.Length >> 1
-                                        , true, string.Empty, fi.Name);
+
+            var outFi = new FileInfo(outPath);
+            return new ConversionResult(fi.Length, outFi.Length, true, string.Empty, fi.Name);
         }
         catch (Exception e)
         {
