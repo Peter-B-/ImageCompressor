@@ -27,6 +27,12 @@ public sealed class CompressImagesSettings : CommandSettings
     [DefaultValue(98)]
     public int Quality { get; init; }
 
+    [Description("Number of concurrent compressions")]
+    [CommandOption("--parallel")]
+    [DefaultValue(4)]
+    public int Parallel { get; init; }
+
+
 
     [CommandOption("-p|--pattern")]
     [Description("Search pattern to discover files. Defaults to [gray]*.bmp[/]")]
@@ -40,20 +46,28 @@ public sealed class CompressImagesSettings : CommandSettings
     [Description("Path to store images. Defaults to [[sourcePath]].")]
     [CommandArgument(1, "[targetPath]")]
     public string? TargetPath { get; init; }
+
+    public string GetSourcePath() => Path.GetFullPath( SourcePath ?? Directory.GetCurrentDirectory());
+    public string GetTargetPath() => Path.GetFullPath(TargetPath ?? SourcePath ?? Directory.GetCurrentDirectory());
 }
 
 internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
 {
     public override int Execute([NotNull] CommandContext context, [NotNull] CompressImagesSettings settings)
     {
-        var searchPath = settings.SourcePath ?? Directory.GetCurrentDirectory();
-        var files = new DirectoryInfo(searchPath)
+        AnsiConsole.MarkupLine($"Converting [green]{settings.SearchPattern}[/] files");
+        AnsiConsole.MarkupLine($"\tfrom [green]{settings.GetSourcePath()}[/]");
+        AnsiConsole.MarkupLine($"\tto   [green]{settings.GetTargetPath()}[/]");
+        AnsiConsole.WriteLine();
+
+        var files = new DirectoryInfo(settings.GetSourcePath())
             .EnumerateFiles(settings.SearchPattern, settings.IncludeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
         var stopwatch = Stopwatch.StartNew();
         var results =
             files
                 .AsParallel()
+                .WithDegreeOfParallelism(settings.Parallel)
                 .Select(fi => ConvertFile(fi, settings))
                 .ToList();
 
@@ -72,8 +86,8 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
                 AnsiConsole.WriteLine(res.errorMessage);
                 AnsiConsole.WriteLine();
             }
-
         }
+
         return 0;
     }
 
@@ -81,10 +95,8 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
     {
         try
         {
-
-            var outDir = GetOutDir(settings,fi.DirectoryName);
-            Directory.CreateDirectory(outDir);
-            var outPath = Path.Combine(outDir, Path.ChangeExtension(fi.Name , "jpg"));
+            var outPath = GetOutPath(settings, fi, "jpg", false);
+            Directory.CreateDirectory(Path.GetDirectoryName(outPath)!);
 
             using (var org = Cv2.ImRead(fi.FullName))
             {
@@ -101,18 +113,26 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
         {
             return new ConversionResult(fi.Length, 0, false, e.Message, fi.Name);
         }
+    }
 
+    private string GetOutPath(CompressImagesSettings settings, FileInfo fi, string extension, bool appendExtension)
+    {
+        var relativePath = Path.GetRelativePath(settings.GetSourcePath(), fi.FullName);
+        if (appendExtension)
+            relativePath += "." + extension;
+        else
+            relativePath = Path.ChangeExtension(relativePath, extension);
+        
+        return Path.Combine(settings.GetTargetPath(), relativePath);
     }
 
     private string GetOutDir(CompressImagesSettings settings, string? fileDirectory)
     {
-        if (settings.TargetPath == null) 
-            return fileDirectory ?? settings.SourcePath?? Directory.GetCurrentDirectory();
+        if (settings.TargetPath == null)
+            return fileDirectory ?? settings.SourcePath ?? Directory.GetCurrentDirectory();
 
         return fileDirectory.Replace(settings.SourcePath, settings.TargetPath, StringComparison.InvariantCultureIgnoreCase);
     }
-
-
 }
 
 internal record ConversionResult(long originalSize, long compressedSize, bool success, string errorMessage, string path)
