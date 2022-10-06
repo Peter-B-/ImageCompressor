@@ -18,6 +18,11 @@ public sealed class CompressImagesSettings : CommandSettings
     [DefaultValue(false)]
     public bool DeleteOriginal { get; init; }
 
+    [CommandOption("-f|--force")]
+    [Description("Overwrite existing files. If [gray]false[/], existing files are skipped.")]
+    [DefaultValue(false)]
+    public bool OverwriteExisting { get; init; }
+
     [Description("Include subdirectories")]
     [CommandOption("-r|--recursive")]
     public bool IncludeSubDirectories { get; init; }
@@ -40,7 +45,7 @@ public sealed class CompressImagesSettings : CommandSettings
     [CommandOption("--sample")]
     public double? SampleRatio { get; init; }
 
-    [CommandOption("-p|--pattern")]
+    [CommandOption("--pattern")]
     [Description("Search pattern to discover files. Defaults to [gray]*.bmp[/]")]
     [DefaultValue("*.bmp")]
     public string SearchPattern { get; init; } = "*.bmp";

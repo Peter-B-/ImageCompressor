@@ -13,6 +13,8 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
 {
     public override int Execute([NotNull] CommandContext context, [NotNull] CompressImagesSettings settings)
     {
+        AnsiConsole.WriteLine();
+        AnsiConsole.WriteLine();
         AnsiConsole.Markup($"Compressing [green]{settings.SearchPattern}[/] files to [green]{settings.OutMode}[/]");
         if (settings.SampleRatio is < 1)
             AnsiConsole.Markup($", sampeling [green]{settings.SampleRatio * 100} %[/]");
@@ -28,22 +30,30 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
             .SpinnerStyle(Style.Parse("green bold"))
             .Start("Converting...", ctx => ConvertFiles(settings));
 
-        var originalSize = results.Where(r => r.Success).Sum(r => r.OriginalSize);
-        var compressedSize = results.Where(r => r.Success).Sum(r => r.CompressedSize);
+        var originalSize = results.Where(r => r.Result == Result.Success).Sum(r => r.OriginalSize);
+        var compressedSize = results.Where(r => r.Result == Result.Success).Sum(r => r.CompressedSize);
 
-        AnsiConsole.MarkupLine($"Converted [blue]{results.Count:N0}[/] [green]{settings.SearchPattern}[/] files in [gray]{stopwatch.Elapsed}[/].");
+        AnsiConsole.MarkupLine($"Converted [blue]{results.Count(r => r.Result == Result.Success):N0}[/] [green]{settings.SearchPattern}[/] files in [gray]{stopwatch.Elapsed}[/].");
         AnsiConsole.MarkupLine($"Reduced size from [blue]{originalSize >> 20}[/] to [blue]{(compressedSize >> 20)}[/] MiB: [green]{(compressedSize * 100.0 / (originalSize + 0.1)):N1} %[/].");
-        if (results.Any(r => !r.Success))
+        if (results.Any(r => r.Result == Result.Skipped))
         {
             AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine($"[red]Error[/]: [orange]{results.Count(r => !r.Success)}[/] files could not be compressed:");
-            foreach (var res in results.Where(r => !r.Success))
+            AnsiConsole.MarkupLine($"[blue]{results.Count(r => r.Result == Result.Skipped)}[/] files already existed and were skipped.");
+        }
+        if (results.Any(r => r.Result == Result.Failed))
+        {
+            AnsiConsole.WriteLine();
+            AnsiConsole.MarkupLine($"[red]Error[/]: [orange]{results.Count(r => r.Result == Result.Failed)}[/] files could not be compressed:");
+            foreach (var res in results.Where(r => r.Result == Result.Failed).Take(50))
             {
                 AnsiConsole.MarkupLine($"[gray]{res.Path}[/]:");
                 AnsiConsole.WriteLine(res.ErrorMessage);
                 AnsiConsole.WriteLine();
             }
         }
+
+        AnsiConsole.WriteLine();
+        AnsiConsole.WriteLine();
 
         return 0;
     }
@@ -52,9 +62,15 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
     {
         try
         {
+            var originalSize = fi.Length;
+
             var compressor = settings.CreateCompressor();
 
             var outPath = GetOutPath(settings, fi, compressor.FileExtension, compressor.AppendExtension);
+
+            if (File.Exists(outPath) && !settings.OverwriteExisting)
+                return new ConversionResult(Result.Skipped, originalSize, new FileInfo(outPath).Length, string.Empty, fi.Name);
+
             Directory.CreateDirectory(Path.GetDirectoryName(outPath)!);
 
             compressor.Compress(fi.FullName, outPath);
@@ -63,11 +79,11 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
                 fi.Delete();
 
             var outFi = new FileInfo(outPath);
-            return new ConversionResult(fi.Length, outFi.Length, true, string.Empty, fi.Name);
+            return new ConversionResult(Result.Success, originalSize, outFi.Length, string.Empty, fi.Name);
         }
         catch (Exception e)
         {
-            return new ConversionResult(fi.Length, 0, false, e.Message, fi.Name);
+            return new ConversionResult(Result.Failed, fi.Exists ? fi.Length : 0, 0, e.Message, fi.Name);
         }
     }
 
