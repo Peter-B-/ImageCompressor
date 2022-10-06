@@ -1,14 +1,16 @@
-﻿using OpenCvSharp;
+﻿
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
 
 namespace ImageCompressor;
 
 public class JpgImageCompressor : ICompressor
 {
-    private readonly int quality;
+    private readonly JpegEncoder jpegEncoder;
 
     public JpgImageCompressor(int? quality)
     {
-        this.quality = quality ?? 98;
+        jpegEncoder = new JpegEncoder() { Quality = quality ?? 98 };
     }
 
     public bool AppendExtension { get; } = false;
@@ -16,8 +18,7 @@ public class JpgImageCompressor : ICompressor
 
     public void Compress(string inPath, string outPath)
     {
-        using var org = Cv2.ImRead(inPath);
-
-        Cv2.ImWrite(outPath, org, new ImageEncodingParam(ImwriteFlags.JpegQuality, quality));
+        using var image = Image.Load(inPath);
+        image.Save(outPath, jpegEncoder);
     }
 }
