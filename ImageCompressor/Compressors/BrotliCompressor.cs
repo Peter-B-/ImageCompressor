@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
 
-namespace ImageCompressor;
+namespace ImageCompressor.Compressors;
 
 public class BrotliCompressor : ICompressor
 {

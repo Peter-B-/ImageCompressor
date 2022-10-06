@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using ImageCompressor.Compressors;
 using Spectre.Cli;
 using Spectre.Console;
 

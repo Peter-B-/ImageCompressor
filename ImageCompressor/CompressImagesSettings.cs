@@ -10,7 +10,9 @@ public sealed class CompressImagesSettings : CommandSettings
     {
         Jpeg,
         Png,
-        Brotli
+        Brotli,
+        Webp,
+        WebpLl
     }
 
     [CommandOption("-d|--delete")]
@@ -27,7 +29,7 @@ public sealed class CompressImagesSettings : CommandSettings
     [CommandOption("-r|--recursive")]
     public bool IncludeSubDirectories { get; init; }
 
-    [Description($"The compression file format to be used: [darkgreen]{nameof(OutputMode.Jpeg)}, {nameof(OutputMode.Brotli)}[/]")]
+    [Description($"The compression file format to be used: [darkgreen]{nameof(OutputMode.Jpeg)}[/], [darkgreen]{nameof(OutputMode.Png)}[/], [darkgreen]{nameof(OutputMode.Webp)}[/], [darkgreen]{nameof(OutputMode.WebpLl)}[/] (lossless) or [darkgreen]{nameof(OutputMode.Brotli)}[/]")]
     [CommandOption("-m|--mode")]
     [DefaultValue(typeof(OutputMode), "Jpeg")]
     public OutputMode OutMode { get; set; }
