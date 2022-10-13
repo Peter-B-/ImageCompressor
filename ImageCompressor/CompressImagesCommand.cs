@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using ImageCompressor.Compressors;
-using Spectre.Cli;
+using Spectre.Console.Cli;
 using Spectre.Console;
 
 namespace ImageCompressor;

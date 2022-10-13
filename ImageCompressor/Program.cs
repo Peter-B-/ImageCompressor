@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 using ImageCompressor;
-using Spectre.Cli;
+using Spectre.Console.Cli;
 
 Console.OutputEncoding = Encoding.UTF8;
 var app = new CommandApp<CompressImagesCommand>();
