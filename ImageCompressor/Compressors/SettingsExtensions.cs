@@ -12,6 +12,7 @@ public static class SettingsExtensions
             CompressImagesSettings.OutputMode.Brotli => new BrotliCompressor(settings.Quality),
             CompressImagesSettings.OutputMode.Webp => new WebpCompressor(settings.Quality),
             CompressImagesSettings.OutputMode.WebpLl => new WebpLlCompressor(settings.Quality),
+            CompressImagesSettings.OutputMode.BrotliUncompress => new BrotliUncompressor(),
             _ => throw new NotSupportedException($"Mode {settings.OutMode} is not supported.")
         };
 }

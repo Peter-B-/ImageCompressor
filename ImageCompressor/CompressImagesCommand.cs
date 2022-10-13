@@ -44,7 +44,7 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
         if (results.Any(r => r.Result == Result.Failed))
         {
             AnsiConsole.WriteLine();
-            AnsiConsole.MarkupLine($"[red]Error[/]: [orange]{results.Count(r => r.Result == Result.Failed)}[/] files could not be compressed:");
+            AnsiConsole.MarkupLine($"[red]Error[/]: [darkorange]{results.Count(r => r.Result == Result.Failed)}[/] files could not be compressed:");
             foreach (var res in results.Where(r => r.Result == Result.Failed).Take(50))
             {
                 AnsiConsole.MarkupLine($"[gray]{res.Path}[/]:");
@@ -67,7 +67,7 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
 
             var compressor = settings.CreateCompressor();
 
-            var outPath = GetOutPath(settings, fi, compressor.FileExtension, compressor.AppendExtension);
+            var outPath = GetOutPath(settings, fi, compressor.FileExtension, compressor.ExtensionHandling);
 
             if (File.Exists(outPath) && !settings.OverwriteExisting)
                 return new ConversionResult(Result.Skipped, originalSize, new FileInfo(outPath).Length, string.Empty, fi.Name);
@@ -109,13 +109,22 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
         return results;
     }
 
-    private string GetOutPath(CompressImagesSettings settings, FileInfo fi, string extension, bool appendExtension)
+    private string GetOutPath(CompressImagesSettings settings, FileInfo fi, string extension, ExtensionHandling extensionHandling)
     {
         var relativePath = Path.GetRelativePath(settings.GetSourcePath(), fi.FullName);
-        if (appendExtension)
-            relativePath += "." + extension;
-        else
-            relativePath = Path.ChangeExtension(relativePath, extension);
+
+        switch (extensionHandling)
+        {
+            case ExtensionHandling.Append:
+                relativePath += "." + extension;
+                break;
+            case ExtensionHandling.Replace:
+                relativePath = Path.ChangeExtension(relativePath, extension);
+                break;
+            case ExtensionHandling.Remove:
+                relativePath = Path.Combine(Path.GetDirectoryName(relativePath)??string.Empty, Path.GetFileNameWithoutExtension(relativePath));
+                break;
+        }
 
         return Path.Combine(settings.GetTargetPath(), relativePath);
     }

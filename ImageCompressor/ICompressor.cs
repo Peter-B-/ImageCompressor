@@ -2,8 +2,15 @@
 
 public interface ICompressor
 {
-    bool AppendExtension { get; }
+    ExtensionHandling ExtensionHandling { get; }
     string FileExtension { get; }
 
     void Compress(string inPath, string outPath);
+}
+
+public enum ExtensionHandling
+{
+    Append,
+    Replace,
+    Remove
 }

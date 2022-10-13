@@ -12,7 +12,7 @@ public class BrotliCompressor : ICompressor
         this.quality = quality ?? 4;
     }
 
-    public bool AppendExtension { get; } = true;
+    public ExtensionHandling ExtensionHandling { get; } = ExtensionHandling.Append;
     public string FileExtension { get; } = "br";
 
     public void Compress(string inPath, string outPath)

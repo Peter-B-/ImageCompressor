@@ -7,7 +7,7 @@ public abstract class ImageConversionCompressor : ICompressor
 {
     protected abstract IImageEncoder Encoder { get; }
 
-    public bool AppendExtension { get; } = false;
+    public ExtensionHandling ExtensionHandling { get; } = ExtensionHandling.Replace;
 
     public void Compress(string inPath, string outPath)
     {
