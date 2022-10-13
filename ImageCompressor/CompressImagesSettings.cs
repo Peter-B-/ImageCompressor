@@ -13,6 +13,7 @@ public sealed class CompressImagesSettings : CommandSettings
         Jpeg,
         Png,
         Brotli,
+        BrotliUncompress,
         Webp,
         WebpLl
     }
@@ -23,7 +24,7 @@ public sealed class CompressImagesSettings : CommandSettings
     public bool DeleteOriginal { get; init; }
 
     [CommandOption("-f|--force")]
-    [Description("Overwrite existing files. If [gray]false[/], existing files are skipped.")]
+    [Description("Overwrite existing files. If [white]false[/], existing files are skipped.")]
     [DefaultValue(false)]
     public bool OverwriteExisting { get; init; }
 
@@ -31,26 +32,29 @@ public sealed class CompressImagesSettings : CommandSettings
     [CommandOption("-r|--recursive")]
     public bool IncludeSubDirectories { get; init; }
 
-    [Description($"The compression file format to be used: [darkgreen]{nameof(OutputMode.Jpeg)}[/], [darkgreen]{nameof(OutputMode.Png)}[/], [darkgreen]{nameof(OutputMode.Webp)}[/], [darkgreen]{nameof(OutputMode.WebpLl)}[/] (lossless) or [darkgreen]{nameof(OutputMode.Brotli)}[/]")]
+    [Description($"The compression file format to be used: \r\n" +
+        $"[darkorange]image:      [/] [green]{nameof(OutputMode.Jpeg)}[/], [green]{nameof(OutputMode.Webp)}[/]\r\n" +
+        $"[darkorange]lossless:   [/] [green]{nameof(OutputMode.Png)}[/], [green]{nameof(OutputMode.WebpLl)}[/]\r\n" +
+        $"[darkorange]compression:[/] [green]{nameof(OutputMode.Brotli)}[/], [green]{nameof(OutputMode.BrotliUncompress)}[/]")]
     [CommandOption("-m|--mode")]
     [DefaultValue(typeof(OutputMode), "Jpeg")]
     public OutputMode OutMode { get; set; }
 
-    [Description("Number of concurrent compressions")]
+    [Description("Number of concurrent compressions (default: [white]4[/])")]
     [CommandOption("--parallel")]
     [DefaultValue(4)]
     public int Parallel { get; init; }
 
-    [Description("Quality used for output (default: 98 for Jpeg, 4 for Brotli")]
+    [Description("Quality used for output\r\ndefault: [white]98[/] for Jpeg, [white]4[/] for Brotli)")]
     [CommandOption("-q|--quality")]
     public int? Quality { get; init; }
 
-    [Description("The ratio of files to process. Use [gray]0.025[/] to convert [gray]2.5%[/] of all images.")]
+    [Description("The ratio of files to process.\r\nUse [white]0.025[/] to convert [white]2.5%[/] of all images.")]
     [CommandOption("--sample")]
     public double? SampleRatio { get; init; }
 
     [CommandOption("--pattern")]
-    [Description("Search pattern to discover files. Defaults to [gray]*.bmp[/]")]
+    [Description("Search pattern to discover files. Defaults to [white]*.bmp[/]")]
     [DefaultValue("*.bmp")]
     public string SearchPattern { get; init; } = "*.bmp";
 
