@@ -43,7 +43,7 @@ public sealed class CompressImagesSettings : CommandSettings
     [Description("Number of concurrent compressions (default: [white]4[/])")]
     [CommandOption("--parallel")]
     [DefaultValue(4)]
-    public int Parallel { get; init; }
+    public int Parallel { get; init; } = 4;
 
     [Description("Quality used for output\r\ndefault: [white]98[/] for Jpeg, [white]4[/] for Brotli)")]
     [CommandOption("-q|--quality")]
@@ -65,6 +65,13 @@ public sealed class CompressImagesSettings : CommandSettings
     [Description("Path to store images. Defaults to [[sourcePath]].")]
     [CommandArgument(1, "[targetPath]")]
     public string? TargetPath { get; init; }
+    
+    [Description("Minimal age in days of files to process - exclude files younger than n days")]
+    [CommandOption("--minage")]
+    public int? MinAgeInDays { get; init; }
+    [Description("Maximal age in days of files to process - exclude files older than n days")]
+    [CommandOption("--maxage")]
+    public int? MaxAgeInDays { get; init; }
 
     public string GetSourcePath() => Path.GetFullPath(SourcePath ?? Directory.GetCurrentDirectory());
     public string GetTargetPath() => Path.GetFullPath(TargetPath ?? SourcePath ?? Directory.GetCurrentDirectory());
