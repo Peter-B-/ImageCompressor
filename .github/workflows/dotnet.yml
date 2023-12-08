@@ -25,11 +25,11 @@ jobs:
     - name: Build
       run: dotnet build --configuration Release --no-restore
     - name: Publish ReadyToRun
-      run: dotnet publish ImageCompressor\ImageCompressor.csproj -c Release -r win-x64 /p:AssemblyVersion=1.0.${{ github.run_number }} /p:FileVersion=1.0.${{ github.run_number }} /p:SelfContained=true /p:PublishReadyToRun=true -o out
+      run: dotnet publish ImageCompressor\ImageCompressor.csproj -c Release -r win-x64 /p:AssemblyVersion=1.0.${{ github.run_number }} /p:FileVersion=1.0.${{ github.run_number }} /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true -o out
     - name: Compress ReadyToRun
       run: Compress-Archive out\ImageCompressor.exe ImageCompressor_ReadyToRun_v1.0.${{ github.run_number }}.zip
     - name: Publish Service ReadyToRun
-      run: dotnet publish ImageCompressor.Service\ImageCompressor.Service.csproj -c Release -r win-x64 /p:AssemblyVersion=1.0.${{ github.run_number }} /p:FileVersion=1.0.${{ github.run_number }} /p:SelfContained=true /p:PublishReadyToRun=true -o out.Service
+      run: dotnet publish ImageCompressor.Service\ImageCompressor.Service.csproj -c Release -r win-x64 /p:AssemblyVersion=1.0.${{ github.run_number }} /p:FileVersion=1.0.${{ github.run_number }} /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true -o out.Service
     - name: Compress Service ReadyToRun
       run: Compress-Archive out.Service\ImageCompressor.exe ImageCompressor.Service_ReadyToRun_v1.0.${{ github.run_number }}.zip
     - name: Create Release
