@@ -28,18 +28,22 @@ jobs:
       run: dotnet publish ImageCompressor\ImageCompressor.csproj -c Release -r win-x64 /p:AssemblyVersion=1.0.${{ github.run_number }} /p:FileVersion=1.0.${{ github.run_number }} /p:SelfContained=true /p:PublishReadyToRun=true -o out
     - name: Compress ReadyToRun
       run: Compress-Archive out\ImageCompressor.exe ImageCompressor_ReadyToRun_v1.0.${{ github.run_number }}.zip
+    - name: Publish Service ReadyToRun
+      run: dotnet publish ImageCompressor.Service\ImageCompressor.Service.csproj -c Release -r win-x64 /p:AssemblyVersion=1.0.${{ github.run_number }} /p:FileVersion=1.0.${{ github.run_number }} /p:SelfContained=true /p:PublishReadyToRun=true -o out.Service
+    - name: Compress Service ReadyToRun
+      run: Compress-Archive out.Service\ImageCompressor.exe ImageCompressor.Service_ReadyToRun_v1.0.${{ github.run_number }}.zip
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: 1.0.${{ github.run_number }}
-        release_name: 1.0.${{ github.run_number }}
+        tag_name: v1.0.${{ github.run_number }}
+        release_name: v1.0.${{ github.run_number }}
         draft: false
         prerelease: true
     - name: Upload ReadyToRun
-      id: upload-release-asset2 
+      id: upload-release-asset 
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,4 +51,14 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
         asset_path: ImageCompressor_ReadyToRun_v1.0.${{ github.run_number }}.zip
         asset_name: ImageCompressor_ReadyToRun_v1.0.${{ github.run_number }}.zip
+        asset_content_type: application/zip
+    - name: Upload ReadyToRun Service
+      id: upload-release-asset2
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+        asset_path: ImageCompressor.Service_ReadyToRun_v1.0.${{ github.run_number }}.zip
+        asset_name: ImageCompressor.Service_ReadyToRun_v1.0.${{ github.run_number }}.zip
         asset_content_type: application/zip
