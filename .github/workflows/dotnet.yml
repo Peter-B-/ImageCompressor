@@ -31,7 +31,7 @@ jobs:
     - name: Publish Service ReadyToRun
       run: dotnet publish ImageCompressor.Service\ImageCompressor.Service.csproj -c Release -r win-x64 /p:AssemblyVersion=1.0.${{ github.run_number }} /p:FileVersion=1.0.${{ github.run_number }} /p:SelfContained=true /p:PublishReadyToRun=true /p:PublishSingleFile=true -o out.Service
     - name: Compress Service ReadyToRun
-      run: Compress-Archive out.Service\ImageCompressor.exe ImageCompressor.Service_ReadyToRun_v1.0.${{ github.run_number }}.zip
+      run: Compress-Archive out.Service\ImageCompressor.Service.exe ImageCompressor.Service_ReadyToRun_v1.0.${{ github.run_number }}.zip
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
