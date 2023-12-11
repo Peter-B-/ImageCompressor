@@ -5,13 +5,44 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using ImageCompressor.Compressors;
+using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 using Spectre.Console;
 
 namespace ImageCompressor;
 
-internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
+public sealed class CompressImagesCommand : Command<CompressImagesSettings>
 {
+    public void ExecuteEmbedded(ILogger logger, [NotNull] CompressImagesSettings settings)
+    {
+        logger?.LogInformation($"Compressing {settings.SearchPattern} files to {settings.OutMode}");
+        if (settings.SampleRatio is < 1)
+            logger?.LogInformation($"sampeling {settings.SampleRatio * 100} %");
+        logger?.LogInformation($"\tfrom {settings.GetSourcePath()}");
+        logger?.LogInformation($"\tto   {settings.GetTargetPath()}");
+        
+        var stopwatch = Stopwatch.StartNew();
+
+        var results = ConvertFiles(settings);
+
+        var originalSize = results.Where(r => r.Result == Result.Success).Sum(r => r.OriginalSize);
+        var compressedSize = results.Where(r => r.Result == Result.Success).Sum(r => r.CompressedSize);
+
+        logger?.LogInformation($"Converted {results.Count(r => r.Result == Result.Success):N0} {settings.SearchPattern} files in {stopwatch.Elapsed}.");
+        logger?.LogInformation($"Reduced size from {originalSize >> 20} to {(compressedSize >> 20)} MiB: {(compressedSize * 100.0 / (originalSize + 0.1)):N1} %.");
+        if (results.Any(r => r.Result == Result.Skipped))
+        {
+            logger?.LogInformation($"{results.Count(r => r.Result == Result.Skipped)} files already existed and were skipped.");
+        }
+        if (results.Any(r => r.Result == Result.Failed))
+        {
+            logger?.LogError($"Error: {results.Count(r => r.Result == Result.Failed)} files could not be compressed:");
+            foreach (var res in results.Where(r => r.Result == Result.Failed).Take(50))
+            {
+                logger?.LogInformation($"{res.Path}: {res.ErrorMessage}");
+            }
+        }
+    }
     public override int Execute([NotNull] CommandContext context, [NotNull] CompressImagesSettings settings)
     {
         AnsiConsole.WriteLine();
@@ -93,6 +124,16 @@ internal sealed class CompressImagesCommand : Command<CompressImagesSettings>
         var files = new DirectoryInfo(settings.GetSourcePath())
             .EnumerateFiles(settings.SearchPattern, settings.IncludeSubDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 
+        if (settings.MinAgeInDays != null)
+        {
+            files = files.Where(f => f.CreationTimeUtc <= DateTime.UtcNow.AddDays(-settings.MinAgeInDays.Value));
+        }
+        
+        if (settings.MaxAgeInDays != null)
+        {
+            files = files.Where(f => f.CreationTimeUtc >= DateTime.UtcNow.AddDays(-settings.MaxAgeInDays.Value));
+        }
+        
         if (settings.SampleRatio is < 1)
         {
             var rand = new Random();
