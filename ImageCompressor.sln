@@ -3,9 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31808.319
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageCompressor", "ImageCompressor\ImageCompressor.csproj", "{E765A8FD-5F91-4AC8-A05E-08E4EAD5FA49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageCompressor", "ImageCompressor\ImageCompressor.csproj", "{E765A8FD-5F91-4AC8-A05E-08E4EAD5FA49}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageCompressor.Service", "ImageCompressor.Service\ImageCompressor.Service.csproj", "{C5679F38-15C9-4FDE-83AC-0B86B7458979}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageCompressor.Service", "ImageCompressor.Service\ImageCompressor.Service.csproj", "{C5679F38-15C9-4FDE-83AC-0B86B7458979}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Solution Items", "_Solution Items", "{A316033D-9E24-4C3A-B754-572C1F4A0B82}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
