@@ -4,12 +4,12 @@ using Microsoft.Extensions.Options;
 using Serilog;
 
 var configuration = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json")
     .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", true)
     .Build();
 
 IHost host = Host.CreateDefaultBuilder(args)
+    .UseContentRoot(AppContext.BaseDirectory)
     .ConfigureServices(services =>
     {
         services.AddOptions<SettingsRoot>()
